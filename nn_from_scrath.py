@@ -40,11 +40,14 @@ def one_hot(y, num_classes=10):
     y: shape (N,) integer labels
     returns: shape (N, num_classes) one-hot vectors
     """
+    
     N = y.shape[0]
-    oh = np.zeros((N, num_classes), dtype=np.float32)
-    # TODO: set the correct positions to 1 using fancy indexing
-    # hint: oh[np.arange(N), y] = 1
-    raise NotImplementedError("Implement one_hot function.")
+    oh = np.zeros((N, num_classes))
+    oh[np.arange(N), y] = 1
+    
+    return oh
+
+
 
 
 def accuracy(y_true, y_pred):
@@ -53,8 +56,11 @@ def accuracy(y_true, y_pred):
     y_true: (N,)
     y_pred: (N,)
     """
-    # TODO: compare y_true and y_pred and return mean correctness
-    raise NotImplementedError("Implement accuracy function.")
+
+    return np.mean(y_true == y_pred)
+
+
+
 
 
 def iterate_minibatches(X, y, batch_size, shuffle=True):
