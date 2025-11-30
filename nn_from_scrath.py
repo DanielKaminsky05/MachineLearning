@@ -102,20 +102,22 @@ class Dense:
         returns: (N, out_features)
         """
         self.x = x
-        # TODO: implement z = xW + b
-        # hint: use np.dot(x, self.W) + self.b
-        raise NotImplementedError("Implement Dense.forward.")
+        xW = x @ self.W
+        z = xW + self.b
+
+        return z
 
     def backward(self, grad_output):
         """
         grad_output: dL/dz, shape (N, out_features)
         returns: dL/dx, shape (N, in_features)
         """
-        # TODO:
-        # dW = x^T * grad_output
-        # db = sum over batch of grad_output
-        # dx = grad_output * W^T
-        raise NotImplementedError("Implement Dense.backward.")
+
+        self.dW = self.x.T @ grad_output
+        self.db = np.sum(grad_output, axis=0, keepdims=True)
+        dx = grad_output @ self.W.T
+        return dx
+
 
     def step(self, lr):
         """
@@ -131,12 +133,11 @@ class ReLU:
 
     def forward(self, x):
         self.x = x
-        # TODO: return elementwise max(0, x)
-        raise NotImplementedError("Implement ReLU.forward.")
+        return np.maximum(0,x)
 
     def backward(self, grad_output):
-        # TODO: pass gradient where x > 0, else 0
-        raise NotImplementedError("Implement ReLU.backward.")
+        return grad_output * (self.x > 0)
+        
 
 
 class Sigmoid:
@@ -145,11 +146,13 @@ class Sigmoid:
 
     def forward(self, x):
         # TODO: compute sigmoid(x) = 1/(1+exp(-x)) and store as self.out
-        raise NotImplementedError("Implement Sigmoid.forward.")
+        self.out = 1/(1+np.exp(-x))
+        return self.out
 
     def backward(self, grad_output):
         # TODO: derivative of sigmoid is s * (1 - s), where s = self.out
-        raise NotImplementedError("Implement Sigmoid.backward.")
+        sigmoidDerivative = self.out * (1-self.out)
+        return sigmoidDerivative * grad_output
 
 
 # =========================
@@ -165,7 +168,15 @@ def softmax(logits):
     # 1. subtract max per row
     # 2. exponentiate
     # 3. divide by row-wise sum
-    raise NotImplementedError("Implement softmax function.")
+
+
+    logits_stable = logits - np.max(logits, axis = 1, keepdims=True)
+
+    logits_exp = np.exp(logits_stable)
+    sum_exp = np.sum(logits_exp, axis = 1, keepdims=True)
+    return logits_exp / sum_exp
+
+    
 
 
 def cross_entropy_loss(probs, y_onehot):
@@ -177,7 +188,9 @@ def cross_entropy_loss(probs, y_onehot):
     N = probs.shape[0]
     # TODO: compute -sum(y * log(p + eps))/N
     # eps = 1e-9 to avoid log(0)
-    raise NotImplementedError("Implement cross_entropy_loss.")
+
+    loss = -np.sum(y_onehot * np.log(probs + 1e-9)) /N
+    return loss
 
 
 def softmax_cross_entropy_with_logits(logits, y_onehot):
@@ -191,7 +204,9 @@ def softmax_cross_entropy_with_logits(logits, y_onehot):
 
     N = logits.shape[0]
     # TODO: gradient wrt logits: (probs - y_onehot)/N
-    raise NotImplementedError("Implement grad_logits in softmax_cross_entropy_with_logits.")
+    grad_logits = (probs - y_onehot) / N
+    
+    return loss, grad_logits  # Return BOTH loss and gradient
 
 
 # =========================
